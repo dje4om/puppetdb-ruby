@@ -51,23 +51,34 @@ client.request uptime.and(debian)
 client.request uptime.and(redhat)
 client.request uptime.and(debian.or(redhat))
 ```
+
 ## Parameters
 
-* puppetdb_majversion
-optional
-type: string
-default: use the latest uri scheme : /pdb/query/v4/<endpoint>
+* puppetdb_majversion:
 
-use right uri scheme depending on major PuppetDB version
+  description : use right uri scheme depending on major PuppetDB version  
+  optional  
+  type: string  
+  default: use the latest uri scheme : /pdb/query/v4/<endpoint>
 
-For PuppetDB 2.x :
+For example :
+  
+PuppetDB = 2.x :
+
 ```
 puppetdb_majversion: "2"
 ```
-This allow retro compat for existing scripts by adding this parameter to you PuppetDB::Client object
 
-For PuppetDB > 2.x:
-do not set parameter is recommended way
+This allow retro compat for existing scripts by adding this parameter to your PuppetDB::Client object
+
+PuppetDB > 2.x:
+
+do not set parameter is recommended way, but you can do it :
+
+
+```
+puppetdb_majversion: "4"
+```
 
 ## Tests
 
