@@ -52,6 +52,12 @@ module PuppetDB
 
       server = hash_get(settings, 'server')
       pem    = hash_get(settings, 'pem')
+      @puppetdb_majversion = hash_get(settings, 'puppetdb_majversion')
+      if @puppetdb_majversion.nil? || @puppetdb_majversion.empty?
+        @legacy_url = false
+      elsif @puppetdb_majversion == '2'
+        @legacy_url = true
+      end
 
       scheme = URI.parse(server).scheme
 
@@ -71,32 +77,39 @@ module PuppetDB
         self.class.connection_adapter(FixSSLConnectionAdapter)
       end
 
-      self.class.base_uri(server + '/v' + version.to_s())
+      self.class.base_uri(server)
     end
 
     def raise_if_error(response)
       if response.code.to_s() =~ /^[4|5]/
-        raise APIError.new(response)
+        raise response
+        #raise APIError.new(response)
       end
     end
 
     def request(endpoint, query, opts={})
       query = PuppetDB::Query.maybe_promote(query)
       json_query = query.build()
-
-      path = "/" + endpoint
+      if @legacy_url
+        path = '/v' + @version.to_s() + '/'  + endpoint
+      else
+        path = '/pdb/query/v' + @version.to_s() +'/' + endpoint
+      end
 
       filtered_opts = {'query' => json_query}
       opts.each do |k,v|
         if k == :counts_filter
           filtered_opts['counts-filter'] = JSON.dump(v)
         else
-          filtered_opts[k.to_s.sub("_", "-")] = v
+          if @puppetdb_majversion == "2"
+            filtered_opts[k.to_s.sub("_", "-")] = v
+          else
+            filtered_opts[k.to_s.sub("-", "_")] = v
+          end
         end
       end
 
       debug("#{path} #{json_query} #{opts}")
-
       ret = self.class.get(path, :query => filtered_opts)
       raise_if_error(ret)
 
@@ -107,5 +120,6 @@ module PuppetDB
 
       Response.new(ret.parsed_response, total)
     end
+
   end
 end

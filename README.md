@@ -23,6 +23,7 @@ client = PuppetDB::Client.new({:server => 'http://localhost:8080'})
 # ssl
 client = PuppetDB::Client.new({
     :server => 'https://localhost:8081',
+    :puppetdb_majversion => '4', # optional
     :pem    => {
         'key'     => "keyfile",
         'cert'    => "certfile",
@@ -50,6 +51,23 @@ client.request uptime.and(debian)
 client.request uptime.and(redhat)
 client.request uptime.and(debian.or(redhat))
 ```
+## Parameters
+
+* puppetdb_majversion
+optional
+type: string
+default: use the latest uri scheme : /pdb/query/v4/<endpoint>
+
+use right uri scheme depending on major PuppetDB version
+
+For PuppetDB 2.x :
+```
+puppetdb_majversion: "2"
+```
+This allow retro compat for existing scripts by adding this parameter to you PuppetDB::Client object
+
+For PuppetDB > 2.x:
+do not set parameter is recommended way
 
 ## Tests
 
