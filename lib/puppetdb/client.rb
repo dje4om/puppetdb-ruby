@@ -83,7 +83,6 @@ module PuppetDB
     def raise_if_error(response)
       if response.code.to_s() =~ /^[4|5]/
         raise response
-        #raise APIError.new(response)
       end
     end
 
